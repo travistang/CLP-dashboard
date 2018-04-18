@@ -69,6 +69,7 @@ import Vue from 'vue'
 import Map from './components/Map'
 import SearchBox from './components/SearchBox'
 import Suggestions from './components/suggestions/Suggestions'
+import {parseToken} from './utils'
 export default {
   name: 'app',
   components: {
@@ -233,6 +234,8 @@ export default {
   },
   mounted: function() {
     this.setCenter()
+    // check the login status
+    alert(this.$route.query)
     setInterval(this.fetchStations,30000)
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(position => {

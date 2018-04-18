@@ -17,13 +17,13 @@
       :clickable="true"
       :draggable="false"
       :opacity="generalStationMarkerOpacity"
-      @click="() => openSetFavouriteInfoWindow(m)"
+      @click="() => openFavouriteStationCandidateWindow(m)"
       @mouseover="() => infoWindowFlag.push(m.id)"
       @mouseout="() => infoWindowFlag = infoWindowFlag.filter(i => i != m.id)"
       :icon="() => getGeneralStationMarkerIcon(m)"
     >
       <gmap-info-window
-        v-if="favouriteStationCandidate"
+        v-if="favouriteStationCandidate && favouriteStationCandidate.id == m.id"
       >
         <div class="station-info-window-main" @click="setCandidateAsFavourite">
           {{isCandidateFavourite?"Remove as favourite":"Set as favourite"}}
@@ -211,8 +211,13 @@ export default {
     })
   },
   methods: {
+    openFavouriteStationCandidateWindow: function(m) {
+      this.favouriteStationCandidate = m
+    },
     setCandidateAsFavourite: function() {
       // TODO: get favourite from state of this component, then submit to endpoint
+
+      this.favouriteStationCandidate = null
     },
     onHoverSuggestion: function(point) {
       // let the info window of the point flows
@@ -248,6 +253,7 @@ export default {
     mapClicked: function(event) {
       // hide the selection
       this.selectedLocation = null
+      this.favouriteStationCandidate = null
     },
 
     mapDragged: function(event) {
@@ -320,8 +326,8 @@ export default {
   },
   computed: {
     isCandidateFavourite: function() {
-      if(favouriteStationCandidate) {
-        return this.favourites.filter(f => f.id).indexOf(favouriteStationCandidate.id) != -1
+      if(this.favouriteStationCandidate) {
+        return this.favourites.filter(f => f.id).indexOf(this.favouriteStationCandidate.id) != -1
       }
     },
     getGeneralStationMarkerIcon: function(m) {
