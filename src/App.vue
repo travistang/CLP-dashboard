@@ -11,10 +11,13 @@
       selectTo: similar to above, except it is for `to`
     -->
     <SearchBox
+      :user="user"
       :selectedFrom="from"
       :selectedTo="to"
       :boundary="searchBoundary"
       :mapObject="mapObject"
+      :home="home"
+      :work="work"
       @updateNameSearchCandidate="updateNameSearchCandidate"
       @previewCandidate="previewCandidate"
       @selectFrom="suggestFrom"
@@ -42,6 +45,8 @@
       @mapAcquired="(map) => this.mapObject = map"
       @previewSuggestion="(s) => this.previewSuggestion = s"
       @selectSuggestion="(s) => this.setEndpoint(s)"
+      @markLocation="markLocation"
+      @toggleFavourite="toggleFavourite"
     />
     <!--
       suggestions: list of suggestions initiated by either name search or direct point search
@@ -74,11 +79,24 @@ export default {
   data () {
     return {
       stations: [],
-
+      user: {
+        name: 'Travis',
+        email: 'travis@google.com',
+      },
       // the following two are latLngs, NOT stations
       from: null,
       to: null,
 
+      // favourte point
+      // TODO: remove me
+      home: {
+        lat: 51.5283063,
+        lng: -0.382465
+      },
+      work: {
+        lat: 51.529,
+        lng: -0.382465
+      },
       // just a placeholder, can be whatever
       center: {lat: 0, lng: 0},
 
@@ -173,8 +191,15 @@ export default {
       this.suggestFor = suggestFor
       this.center = s
       this.suggestionFromLatLng = s
-    }
+    },
 
+    markLocation(type,latlng) {
+      // TODO: set home, work here
+    },
+
+    toggleFavourite(station_id) {
+      // TODO: set station as favourite by giving the station id
+    },
   },
   computed: {
     suggestions: function() {
@@ -183,8 +208,21 @@ export default {
       }
       let distFunc = s => Math.pow(s.latLng.lat - this.suggestionFromLatLng.lat,2) + Math.pow(s.latLng.lng - this.suggestionFromLatLng.lng,2)
       // TODO: filter this according selection points (from/to)
-      let res = this.stations.sort((s1,s2) => distFunc(s1) - distFunc(s2)).slice(0,this.nbSuggestions)
-      return res
+      if(this.suggestFor == 'from') {
+        let res = this.stations
+          .filter(s => s.nbBikes > 0)
+          .sort((s1,s2) => distFunc(s1) - distFunc(s2))
+          .slice(0,this.nbSuggestions)
+        return res
+      }
+      else {
+        let res = this.stations
+          .filter(s => s.nbEmptyDocks > 0)
+          .sort((s1,s2) => distFunc(s1) - distFunc(s2))
+          .slice(0,this.nbSuggestions)
+        return res
+      }
+
     },
     searchBoundary: function() {
       if(this.suggestions.length == []) return null

@@ -17,10 +17,18 @@
       :clickable="true"
       :draggable="false"
       :opacity="generalStationMarkerOpacity"
+      @click="() => openSetFavouriteInfoWindow(m)"
       @mouseover="() => infoWindowFlag.push(m.id)"
       @mouseout="() => infoWindowFlag = infoWindowFlag.filter(i => i != m.id)"
       :icon="() => getGeneralStationMarkerIcon(m)"
     >
+      <gmap-info-window
+        v-if="favouriteStationCandidate"
+      >
+        <div class="station-info-window-main" @click="setCandidateAsFavourite">
+          {{isCandidateFavourite?"Remove as favourite":"Set as favourite"}}
+        </div>
+      </gmap-info-window>
       <gmap-info-window
         v-if="infoWindowFlag.indexOf(m.id) != -1"
       >
@@ -29,7 +37,8 @@
             {{m.name}}
           </div>
           <div class="station-info-window-details">
-            {{m.nbEmptyDocks}} out of {{m.nbDocks}} dock{{m.nbDocks > 1?'s':''}} remaining
+            {{m.nbBikes}} bike{{m.nbBikes > 1?'s':''}}.
+            {{m.nbEmptyDocks}} empty dock{{m.nbEmptyDocks > 1?'s':''}} available.
           </div>
         </div>
 
@@ -66,7 +75,8 @@
             {{m.name}}
           </div>
           <div class="station-info-window-details">
-            {{m.nbEmptyDocks}} out of {{m.nbDocks}} dock{{m.nbDocks > 1?'s':''}} remaining
+            {{m.nbBikes}} bike{{m.nbBikes > 1?'s':''}}.
+            {{m.nbEmptyDocks}} empty dock{{m.nbEmptyDocks > 1?'s':''}} available.
           </div>
         </div>
 
@@ -123,6 +133,10 @@ export default {
     InfoWindow,
   },
   props: {
+    favourites: {
+      type: Array,
+      default: () => []
+    },
     center: {
       type: Object,
       default: () => ({lat: 0, lng: 0}),
@@ -167,6 +181,8 @@ export default {
       selectedLocation: null,
 
       routePoints: [],
+
+      favouriteStationCandidate: null,
     }
   },
   watch: {
@@ -195,6 +211,9 @@ export default {
     })
   },
   methods: {
+    setCandidateAsFavourite: function() {
+      // TODO: get favourite from state of this component, then submit to endpoint
+    },
     onHoverSuggestion: function(point) {
       // let the info window of the point flows
       this.infoWindowFlag.push(point.id)
@@ -300,6 +319,11 @@ export default {
     }
   },
   computed: {
+    isCandidateFavourite: function() {
+      if(favouriteStationCandidate) {
+        return this.favourites.filter(f => f.id).indexOf(favouriteStationCandidate.id) != -1
+      }
+    },
     getGeneralStationMarkerIcon: function(m) {
       let markerColor = 'red' // default color
       if(m.nbEmptyDocks == 0) {

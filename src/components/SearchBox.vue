@@ -1,8 +1,22 @@
 <template>
   <div class="search-box-container">
     <div class='search-box'>
+      <div class='search-header'>
+        Welcome, {{user.name}}
+      </div>
       <div class="search-header">
         Choose where you want to go here
+      </div>
+      <div class="search-header"
+        v-if="home && currentInputField"
+        @click="chooseHomeAsInput"
+      >
+        Use Home as input
+      </div>
+      <div class="search-header"
+        @click="chooseWorkAsInput"
+        v-if="work && currentInputField">
+        Use Work as input
       </div>
       <div class="search-input-col">
         <div class="search-input-title">
@@ -64,6 +78,19 @@
 import {loaded} from 'vue2-google-maps'
 export default {
   props: {
+    user: {
+      type: Object,
+      default: () => ({
+        'name': '',
+        'email': '',
+      })
+    },
+    home: {
+      default: () => null,
+    },
+    work: {
+      default: () => null,
+    },
     selectedFrom: {
       default: () => null,
     },
@@ -128,25 +155,18 @@ export default {
     },
   },
   methods: {
-    // reverseGeocode: function(latLng,fieldName) {
-    //   this.isSelectionSet = true
-    //   if(v == null) {
-    //     this[fieldName] = ""
-    //   }
-    //   this.disable = true
-    //   let geocoder = new google.maps.Geocoder
-    //   geocoder.geocode({'location': v}, (results,status) => {
-    //     this.disable = false
-    //     if(status == "OK" && results[0]) {
-    //       // set the name of the address
-    //       this[fieldName] = results[0].name
-    //     } else {
-    //       // failed to load the name corresponding to latLng
-    //       this[fieldName] = `(${v.lat},${v.lng})`
-    //     }
-    //   })
-    //
-    // },
+    chooseHomeAsInput() {
+      this.resetState()
+      this.isSelectionSet = true
+      let emitMsgName = (this.currentInputField == 'from')? 'selectFrom':'selectTo'
+      this.$emit(emitMsgName,this.home)
+    },
+    chooseWorkAsInput() {
+      this.resetState()
+      this.isSelectionSet = true
+      let emitMsgName = (this.currentInputField == 'from')? 'selectFrom':'selectTo'
+      this.$emit(emitMsgName,this.work)
+    },
     selectSuggestion(s) {
       this.resetState()
 

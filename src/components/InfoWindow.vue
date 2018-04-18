@@ -1,10 +1,22 @@
 <template>
   <div class="info-window-container">
-    <div class="btn" @click="emitFrom">
-      From
+    <div class="row">
+      <div class="btn" @click="emitFrom">
+        From
+      </div>
+      <div class="btn" @click="emitTo">
+        To
+      </div>
     </div>
-    <div class="btn" @click="emitTo">
-      To
+    <div class="row">
+      <div class="btn" @click="setHome">
+        Set location as Home
+      </div>
+    </div>
+    <div class="row">
+      <div class="btn" @click="setWork">
+        Set location as Work
+      </div>
     </div>
   </div>
 </template>
@@ -30,7 +42,13 @@ export default {
           action: 'to'
         }
       )
-    }
+    },
+    setHome: function() {
+      // TODO: set this as home
+    },
+    setWork: function() {
+      // TODO: set this as workplace
+    },
   }
 }
 </script>
@@ -39,11 +57,17 @@ export default {
 .info-window-container {
   display: flex;
   display: -webkit-flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100px;
   width: 100px;
   flex: 1;
 
+}
+.row {
+  display: flex;
+  display: -webkit-flex;
+  flex: 1;
+  flex-direction: row;
 }
 .btn {
   flex: 1;
