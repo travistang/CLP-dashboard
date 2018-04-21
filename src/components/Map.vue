@@ -23,7 +23,7 @@
       :icon="() => getGeneralStationMarkerIcon(m)"
     >
       <gmap-info-window
-        v-if="favouriteStationCandidate && favouriteStationCandidate.id == m.id"
+        v-if="favouriteStationCandidate && favouriteStationCandidate.id == m.id && isLoggedIn"
       >
         <div class="station-info-window-main" @click="setCandidateAsFavourite">
           {{isCandidateFavourite?"Remove as favourite":"Set as favourite"}}
@@ -104,7 +104,12 @@
     <gmap-info-window
       v-if="selectedLocation != null"
       :position="selectedLocation">
-      <InfoWindow @action="emitLocation"/>
+      <InfoWindow
+        :isLoggedIn="isLoggedIn"
+        @action="emitLocation"
+        @setHome="setHome"
+        @setWork="setWork"
+      />
     </gmap-info-window>
     <gmap-polyline
       v-if="routePoints.length > 0"
@@ -133,6 +138,10 @@ export default {
     InfoWindow,
   },
   props: {
+    isLoggedIn: {
+      type: Boolean,
+      default: false
+    },
     favourites: {
       type: Array,
       default: () => []
@@ -211,12 +220,20 @@ export default {
     })
   },
   methods: {
+    setHome: function() {
+      this.$emit('setHome',this.selectedLocation)
+      this.selectedLocation = null
+    },
+    setWork: function() {
+      this.$emit('setWork',this.selectedLocation)
+      this.selectedLocation = null
+    },
     openFavouriteStationCandidateWindow: function(m) {
       this.favouriteStationCandidate = m
     },
     setCandidateAsFavourite: function() {
-      // TODO: get favourite from state of this component, then submit to endpoint
-
+      // tell the root that the favourite has been toggled
+      this.$emit('toggleFavourite',this.favouriteStationCandidate)
       this.favouriteStationCandidate = null
     },
     onHoverSuggestion: function(point) {
@@ -327,7 +344,8 @@ export default {
   computed: {
     isCandidateFavourite: function() {
       if(this.favouriteStationCandidate) {
-        return this.favourites.filter(f => f.id).indexOf(this.favouriteStationCandidate.id) != -1
+        return this.favourites
+          .filter(f => f.id == this.favouriteStationCandidate.id).length > 0
       }
     },
     getGeneralStationMarkerIcon: function(m) {

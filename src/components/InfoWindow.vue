@@ -8,12 +8,12 @@
         To
       </div>
     </div>
-    <div class="row">
+    <div class="row" v-if="isLoggedIn">
       <div class="btn" @click="setHome">
         Set location as Home
       </div>
     </div>
-    <div class="row">
+    <div class="row" v-if="isLoggedIn">
       <div class="btn" @click="setWork">
         Set location as Work
       </div>
@@ -23,6 +23,7 @@
 
 <script>
 export default {
+  props: ['isLoggedIn'],
   methods: {
     click: function() {
 
@@ -44,10 +45,14 @@ export default {
       )
     },
     setHome: function() {
-      // TODO: set this as home
+      this.$emit(
+        'setHome'
+      )
     },
     setWork: function() {
-      // TODO: set this as workplace
+      this.$emit(
+        'setWork'
+      )
     },
   }
 }

@@ -2,7 +2,7 @@
   <div class="search-box-container">
     <div class='search-box'>
       <div class='search-header'>
-        Welcome, {{user.name}}
+        {{username?`You are logged in as ${username}`: "You are not logged in"}}
       </div>
       <div class="search-header">
         Choose where you want to go here
@@ -44,7 +44,19 @@
       </div>
 
     </div>
-
+    <!-- Shown only when there are favourites and that no search suggestions are typed -->
+    <div
+      v-if="favourites.length > 0 && currentInputField && searchSuggestions.length == 0 && !isSearching"
+      class="search-result-box">
+      <div v-for="f in favourites"
+        @click="() => setFieldFromFavourite(f)"
+        class="search-suggestion"
+      >
+        <div class="search-suggestion-name">
+          Favourite - {{f.name}}
+        </div>
+      </div>
+    </div>
     <div v-if="searchSuggestions.length > 0" class="search-result-box">
       <div
         @mouseover="() => setPreviewCandidate(s)"
@@ -78,12 +90,13 @@
 import {loaded} from 'vue2-google-maps'
 export default {
   props: {
-    user: {
-      type: Object,
-      default: () => ({
-        'name': '',
-        'email': '',
-      })
+    favourites: {
+      type: Array,
+      default : () => []
+    },
+    username: {
+      type: String,
+      default: null,
     },
     home: {
       default: () => null,
@@ -155,17 +168,28 @@ export default {
     },
   },
   methods: {
+    setFieldFromFavourite(favourite) {
+      let emitMsgName = (this.currentInputField == 'from')?'selectFavouriteFrom':'selectFavouriteTo'
+      this.currentInputField = null
+      this.isSelectionSet = true
+      this.$emit(emitMsgName,favourite)
+      this.resetState()
+    },
     chooseHomeAsInput() {
       this.resetState()
       this.isSelectionSet = true
+
       let emitMsgName = (this.currentInputField == 'from')? 'selectFrom':'selectTo'
       this.$emit(emitMsgName,this.home)
+      this.currentInputField = null
     },
     chooseWorkAsInput() {
       this.resetState()
       this.isSelectionSet = true
+
       let emitMsgName = (this.currentInputField == 'from')? 'selectFrom':'selectTo'
       this.$emit(emitMsgName,this.work)
+      this.currentInputField = null
     },
     selectSuggestion(s) {
       this.resetState()
